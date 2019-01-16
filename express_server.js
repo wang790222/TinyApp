@@ -7,6 +7,9 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -25,9 +28,6 @@ const users = {
   }
 };
 
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
-
 /*
 *   Get Endpoints
 */
@@ -38,7 +38,8 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-  res.render("urls_index", {urls: urlDatabase, username:req.cookies.username});
+  let templateVars = {urls:urlDatabase, user: users[req.cookies.user_id]};
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -96,13 +97,34 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
 
-  res.redirect("/urls");
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(403);
+    res.send("<html>Please make sure filled email and password</html>");
+    return;
+  }
+
+  for(var user in users) {
+    if (users[user].email === req.body.email) {
+      if (users[user].password !== req.body.password) {
+        res.status(403);
+        res.send("<html>Please make sure the password is correct</html>");
+        return;
+      } else {
+        res.cookie("user_id", user);
+        res.redirect("/");
+        return;
+      }
+    }
+  }
+
+  res.status(403);
+  res.send("<html>Email does not exist</html>");
 });
 
 app.post("/logout", (req, res) => {
 
-  res.clearCookie("username");
-  res.redirect("/urls");
+  res.clearCookie("user_id");
+  res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {

@@ -3,24 +3,24 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<header>
-    <title>partial header</title>
-</header>
+<% if(user !== undefined){ %>
+  <head>
+      <title> <%= user.email %> </title>
+  </head>
+<% } %>
 
 <body>
-
-  <% if(username !== undefined){ %>
-
+  <% if(user !== undefined){ %>
     <form action="/logout" method="post">
-      <label for="logout"> <%= username %> </label>
+      <label for="logout"> <%= user.email %> </label>
       <input type="submit" value="Logout"/>
     </form>
   <% } else { %>
-    <form action="/login" method="post">
-      <input id="username" type="text" name="username" placeholder="" style="width: 300px">
-      <input type="submit" value="User Name"/>
-    </form>
+    <a href="/register">Register</a>
+    <a href="/login">Login</a>
+    <br>
   <% } %>
+
 </body>
 
 </html>
