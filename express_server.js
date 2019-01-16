@@ -63,6 +63,12 @@ app.get("/register", (req, res) => {
   res.render("urls_register");
 });
 
+app.get("/login", (req, res) => {
+
+
+  res.render("urls_login");
+});
+
 /*
 *   Post Endpoints
 */
@@ -90,7 +96,6 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
 
-  res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
 
