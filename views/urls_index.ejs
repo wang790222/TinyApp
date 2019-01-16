@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<header>
+  <% include ./partials/_header %>
+</header>
+
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+  <p style="display:inline">
+      <% Object.getOwnPropertyNames(urls).forEach(function(url) { %>
+      <%= url %>   ->   <a href=<%= urls[url] %>><%= urls[url] %></a>
+      <form action="/urls/<%= url %>/delete" method="post" style="display:inline">
+        <input type="submit" name="delete" value="Delete"/>
+      </form>
+      <br>
+    <% }); %>
+  </p>
+</body>
+</html>

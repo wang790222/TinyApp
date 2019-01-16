@@ -1,0 +1,98 @@
+var express = require("express");
+var app = express();
+var PORT = 8080; // default port 8080
+
+app.set("view engine", "ejs");
+
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+
+var urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
+app.post("/urls", (req, res) => {
+
+  let shortUrl = generateRandomString();
+  let newLink = "http://localhost:8080/urls/" + shortUrl;
+
+  urlDatabase[shortUrl] = req.body.longURL;
+
+  //console.log(urlDatabase);
+
+  res.redirect(newLink);
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
+
+app.post("/urls/:id", (req, res) => {
+
+  urlDatabase[req.params.id] = req.body.updatedURL;
+  console.log(urlDatabase);
+
+  res.redirect("/urls");
+});
+
+app.get("/urls", (req, res) => {
+
+  res.render("urls_index", {urls: urlDatabase});
+});
+
+app.get("/urls/new", (req, res) => {
+
+  res.render("urls_new");
+});
+
+app.get("/urls/:id", (req, res) => {
+
+  res.render("urls_show", {shortURL: req.params.id});
+});
+
+app.get("/u/:shortURL", (req, res) => {
+
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
+
+function generateRandomString() {
+
+  let randomStringLength = 6;
+
+  let lowerCase = "abcdefghijklmnopqrstuvwxyz".split('');
+  let captial = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+  let number = "0123456789".split('');
+
+  let randomString = "";
+
+  for (var i = 0; i < randomStringLength; i++) {
+    let chooseType = Math.floor(Math.random() * 3 + 1);
+    switch(chooseType) {
+      case 1:
+        randomString += lowerCase[Math.floor(Math.random() * 26)];
+        break;
+      case 2:
+        randomString += captial[Math.floor(Math.random() * 26)];
+        break;
+      case 3:
+        randomString += number[Math.floor(Math.random() * 10)];
+        break;
+      default:
+        console.log("Something wrong.");
+        break;
+    }
+  }
+  return randomString;
+}
