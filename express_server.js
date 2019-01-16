@@ -12,6 +12,9 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -22,9 +25,6 @@ app.post("/urls", (req, res) => {
   let newLink = "http://localhost:8080/urls/" + shortUrl;
 
   urlDatabase[shortUrl] = req.body.longURL;
-
-  //console.log(urlDatabase);
-
   res.redirect(newLink);
 });
 
@@ -37,14 +37,12 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
 
   urlDatabase[req.params.id] = req.body.updatedURL;
-  console.log(urlDatabase);
-
   res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
 
-  res.render("urls_index", {urls: urlDatabase});
+  res.render("urls_index", {urls: urlDatabase, username:req.cookies.username});
 });
 
 app.get("/urls/new", (req, res) => {
@@ -60,10 +58,24 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
 
   let longURL = urlDatabase[req.params.shortURL];
+
   res.redirect(longURL);
 });
 
+app.post("/login", (req, res) => {
+
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
+
 app.listen(PORT, () => {
+
   console.log(`Example app listening on port ${PORT}!`);
 });
 
@@ -94,5 +106,6 @@ function generateRandomString() {
         break;
     }
   }
+
   return randomString;
 }

@@ -1,5 +1,26 @@
 <!-- views/partials/_header.ejs -->
 
+<!DOCTYPE html>
+<html lang="en">
+
 <header>
     <title>partial header</title>
 </header>
+
+<body>
+
+  <% if(username !== undefined){ %>
+
+    <form action="/logout" method="post">
+      <label for="logout"> <%= username %> </label>
+      <input type="submit" value="Logout"/>
+    </form>
+  <% } else { %>
+    <form action="/login" method="post">
+      <input id="username" type="text" name="username" placeholder="" style="width: 300px">
+      <input type="submit" value="User Name"/>
+    </form>
+  <% } %>
+</body>
+
+</html>
