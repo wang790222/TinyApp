@@ -44,7 +44,11 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
 
-  res.render("urls_new");
+  if (req.cookies.user_id === undefined) {
+    res.redirect("/login");
+  } else {
+    res.render("urls_new", {user: users[req.cookies.user_id]});
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -110,7 +114,7 @@ app.post("/login", (req, res) => {
         res.send("<html>Please make sure the password is correct</html>");
         return;
       } else {
-        res.cookie("user_id", user);
+        res.cookie("user_id", users[user].id);
         res.redirect("/");
         return;
       }
