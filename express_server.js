@@ -109,13 +109,16 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
 
-  let longURL = urlDatabase[req.session.user_id][req.params.id];
+  let shortUrl = req.params.id;
 
-  if (longURL !== undefined) {
-    res.redirect(longURL);
-  } else {
-    res.send("<script> alert(\"This shor url does not exist\");</script>");
+  for (var user in urlDatabase) {
+    if (shortUrl in urlDatabase[user]) {
+      res.redirect(urlDatabase[user][req.params.id]);
+      return;
+    }
   }
+
+  res.send("<script> alert(\"This shor url does not exist\");</script>");
 });
 
 app.get("/register", (req, res) => {
