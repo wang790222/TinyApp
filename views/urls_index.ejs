@@ -7,13 +7,19 @@
   <title>TinyApp</title>
 </head>
 <body>
+  <% if(user !== undefined){ %>
+    <div>
+      <button onclick="window.location.href = 'http://localhost:8080/urls/new';">Create a New Short Link</button>
+    </div>
+  <% } %>
   <p style="display:inline">
-      <% Object.getOwnPropertyNames(urls).forEach(function(url) { %>
-      <a href="http://localhost:8080/urls/<%= url %>"><%= url %></a>   ->   <a href=<%= urls[url] %>><%= urls[url] %></a>
-      <form action="/urls/<%= url %>/delete" method="post" style="display:inline">
-        <input type="submit" name="delete" value="Delete"/>
-      </form>
-      <br>
+    <% Object.getOwnPropertyNames(urls).forEach(function(shortURL) { %>
+    <%= shortURL %>   ->   <%= urls[shortURL] %>
+    <button onclick="window.location.href = 'http://localhost:8080/urls/<%= shortURL %>';">Update</button>
+    <form action="/urls/<%= shortURL %>/delete" method="post" style="display:inline">
+      <input type="submit" name="delete" value="Delete"/>
+    </form>
+    <br>
     <% }); %>
   </p>
 </body>
