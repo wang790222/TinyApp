@@ -2,12 +2,12 @@ var express = require("express");
 var app = express();
 var PORT = 8080; // default port 8080
 
-app.set("view engine", "ejs");
-
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
+
+app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 const urlDatabase = {
@@ -182,7 +182,7 @@ app.post("/login", (req, res) => {
 
   for(var user in users) {
     if (users[user].email === req.body.email) {
-      if (users[user].password !== req.body.password) {
+      if (!bcrypt.compareSync(req.body.password, users[user].password)) {
         res.status(403).send("<html>Please make sure the password is correct</html>");
         return;
       } else {
@@ -219,8 +219,9 @@ app.post("/register", (req, res) => {
   let userInfo = {
     id: userId,
     email: req.body.email,
-    password: req.body.password
+    password: bcrypt.hashSync(req.body.password, 10)
   };
+  console.log(userInfo);
 
   users[userId] = userInfo;
   urlDatabase[userId] = {};
