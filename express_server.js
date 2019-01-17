@@ -1,14 +1,14 @@
 
 var PORT = 8080; // default port 8080
 
-var express = require("express");
+const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
-var app = express();
+const app = express();
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -39,7 +39,7 @@ const users = {
   }
 };
 
-/*
+/**
 *   Get Endpoints
 */
 
@@ -145,7 +145,7 @@ app.get("/login", (req, res) => {
   }
 });
 
-/*
+/**
 *   Post Endpoints
 */
 
@@ -157,6 +157,7 @@ app.post("/urls", (req, res) => {
   if (!isLogin(res, user_id)) {
     return;
   }
+
   urlDatabase[user_id][shortUrl] = req.body.longURL;
   res.redirect(`/urls/${shortUrl}`);
 });
@@ -168,6 +169,7 @@ app.post("/urls/:shortUrl/delete", (req, res) => {
   if (!isLogin(res, user_id)) {
     return;
   }
+
   delete urlDatabase[req.session.user_id][req.params.shortUrl];
   res.redirect("/urls");
 });
@@ -179,6 +181,7 @@ app.post("/urls/:id", (req, res) => {
   if (!isLogin(res, user_id)) {
     return;
   }
+
   urlDatabase[req.session.user_id][req.params.id] = req.body.updatedURL;
   res.redirect("/urls");
 });
