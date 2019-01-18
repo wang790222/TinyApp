@@ -1,11 +1,12 @@
 
 var PORT = 8080; // default port 8080
 
-const express = require("express");
-const bodyParser = require("body-parser");
+const express = require('express');
+const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const cookieSession = require("cookie-session");
-const bcrypt = require("bcrypt");
+const cookieSession = require('cookie-session');
+const bcrypt = require('bcrypt');
+const methodOverride = require('method-override');
 require("dotenv").config();
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use(cookieSession({
   secret: process.env.SESSION_SECRET
 }));
+app.use(methodOverride('_method'));
 
 const urlDatabase = {
   userRandomID: {
@@ -160,30 +162,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortUrl}`);
 });
 
-app.post("/urls/:shortUrl/delete", (req, res) => {
-
-  let user_id = req.session.user_id;
-
-  if (!isLogin(res, user_id)) {
-    return;
-  }
-
-  delete urlDatabase[req.session.user_id][req.params.shortUrl];
-  res.redirect("/urls");
-});
-
-app.post("/urls/:id", (req, res) => {
-
-  let user_id = req.session.user_id;
-
-  if (!isLogin(res, user_id)) {
-    return;
-  }
-
-  urlDatabase[user_id][req.params.id][0] = req.body.updatedURL;
-  res.redirect("/urls");
-});
-
 app.post("/login", (req, res) => {
 
   if (req.body.email === "" || req.body.password === "") {
@@ -237,6 +215,37 @@ app.post("/register", (req, res) => {
   urlDatabase[userId] = {};
 
   req.session.user_id = userId;
+  res.redirect("/urls");
+});
+
+/**
+*   Put Endpoints
+*/
+app.put("/urls/:id", (req, res) => {
+
+  let user_id = req.session.user_id;
+
+  if (!isLogin(res, user_id)) {
+    return;
+  }
+
+  urlDatabase[user_id][req.params.id][0] = req.body.updatedURL;
+  res.redirect("/urls");
+});
+
+/**
+*   Delete Endpoints
+*/
+
+app.delete("/urls/:shortUrl/delete", (req, res) => {
+
+  let user_id = req.session.user_id;
+
+  if (!isLogin(res, user_id)) {
+    return;
+  }
+
+  delete urlDatabase[req.session.user_id][req.params.shortUrl];
   res.redirect("/urls");
 });
 
