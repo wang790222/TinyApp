@@ -13,8 +13,11 @@
     </div>
   <% } %>
   <p style="display:inline">
-    <% Object.getOwnPropertyNames(urls).forEach(function(shortURL) { %>
-    <%= shortURL %>   ->   <%= urls[shortURL] %>
+
+    <% Object.getOwnPropertyNames(urlsInfo).forEach(function(shortURL) { %>
+    <%= shortURL %>   ->   <%= urlsInfo[shortURL][0] %> / Created Date: <%= urlsInfo[shortURL][1] %> /
+    Visited Times: <%= urlsInfo[shortURL][2] %> / Unique Visits: <%= urlsInfo[shortURL][3].length %>
+
     <button onclick="window.location.href = 'http://localhost:8080/urls/<%= shortURL %>';">Update</button>
     <form action="/urls/<%= shortURL %>/delete" method="post" style="display:inline">
       <input type="submit" name="delete" value="Delete"/>

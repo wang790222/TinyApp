@@ -19,10 +19,12 @@ app.use(cookieSession({
 
 const urlDatabase = {
   userRandomID: {
-    "b2xVn2": "http://www.lighthouselabs.ca",
-    "9sm5xK": "http://www.google.com"
+    "b2xVn2":
+      [ "http://www.lighthouselabs.ca", "2019-1-1 20:10:30", 5, ["a", "b", "c"] ],
+    "9sm5xK":
+      [ "http://www.google.com", "2019-1-19 20:10:30", 3, ["d", "e", "f"] ]
   }, user2RandomID: {
-    "b2xVn2": "http://www.lighthouselabs.ca",
+    "b2xVn2": [ "http://www.lighthouselabs.ca", "2019-1-18 20:10:30", 5, { "visitors": ["a", "b", "c"] } ]
   }
 };
 
@@ -60,7 +62,7 @@ app.get("/urls", (req, res) => {
     return;
   }
 
-  let templateVars = {urls: urlsForUser(user_id), user: users[user_id]};
+  let templateVars = {urlsInfo: urlsForUser(user_id), user: users[user_id]};
   res.render("urls_index", templateVars);
 });
 
@@ -77,34 +79,28 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
 
   let user_id = req.session.user_id;
-  let shortUrlExist = false;
 
   if (!isLogin(res, user_id)) {
     return;
   }
 
-  for (var user in users) {
-    if (req.params.id in urlsForUser(user)) {
+  for (var user in urlDatabase) {
+    if (req.params.id in urlDatabase[user]) {
       if (user_id === user) {
-        res.render("urls_show", {
-        shortURL: req.params.id,
-        longURL: urlsForUser(user_id)[req.params.id],
-        user: users[user_id]
-        });
+        let templateVars = {
+          shortURL: req.params.id,
+          urlsInfo: urlDatabase[user_id][req.params.id],
+          user: users[user_id]
+        };
+        res.render("urls_show", templateVars);
         return;
       } else {
-        shortUrlExist = true;
+        res.send("<script> alert(\"This short url does not belong you\");</script>");
+        return;
       }
     }
   }
-
-  if(shortUrlExist) {
-    res.send("<script> alert(\"This short url does not belong you\");</script>");
-    return;
-  } else {
-    res.send("<script> alert(\"This short url does not exist\");</script>");
-    return;
-  }
+  res.send("<script> alert(\"This short url does not exist\");</script>");
 });
 
 app.get("/u/:id", (req, res) => {
@@ -113,7 +109,9 @@ app.get("/u/:id", (req, res) => {
 
   for (var user in urlDatabase) {
     if (shortUrl in urlDatabase[user]) {
-      res.redirect(urlDatabase[user][req.params.id]);
+      urlDatabase[user][shortUrl][2]++;
+      urlDatabase[user][shortUrl][3] = updateUniqueVisit(req, urlDatabase[user][shortUrl][3]);
+      res.redirect(urlDatabase[user][shortUrl][0]);
       return;
     }
   }
@@ -138,7 +136,7 @@ app.get("/login", (req, res) => {
   let user_id = req.session.user_id;
 
   if (user_id === undefined) {
-    res.render("urls_login");
+    res.render("urls_login", {user: user_id});
     return;
   } else {
     res.redirect("/urls");
@@ -158,7 +156,7 @@ app.post("/urls", (req, res) => {
     return;
   }
 
-  urlDatabase[user_id][shortUrl] = req.body.longURL;
+  urlDatabase[user_id][shortUrl] = getUrlInfo(req.body.longURL);
   res.redirect(`/urls/${shortUrl}`);
 });
 
@@ -182,7 +180,7 @@ app.post("/urls/:id", (req, res) => {
     return;
   }
 
-  urlDatabase[req.session.user_id][req.params.id] = req.body.updatedURL;
+  urlDatabase[user_id][req.params.id][0] = req.body.updatedURL;
   res.redirect("/urls");
 });
 
@@ -290,4 +288,27 @@ function isLogin(res, userId) {
   }
 
   return true;
+}
+
+function getUrlInfo(longUrl) {
+
+  let currentTime = new Date();
+  let currentTimeStr = `${currentTime.getFullYear()}-${currentTime.getMonth() + 1}-${currentTime.getDate()} ${currentTime.getHours()}:${currentTime.getMinutes()}:${currentTime.getSeconds()}`;
+  let urlInfo = [longUrl, currentTimeStr, 0, []];
+  return urlInfo;
+}
+
+function updateUniqueVisit(req, uniqueVisit) {
+
+  let ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+
+  for (var uniqueIp of uniqueVisit) {
+    if (uniqueIp === ip) {
+      return uniqueVisit;
+    }
+  }
+
+  let newUniqueVisit = uniqueVisit;
+  newUniqueVisit.push(ip);
+  return newUniqueVisit;
 }
