@@ -16,7 +16,7 @@
 
     <% Object.getOwnPropertyNames(urlsInfo).forEach(function(shortURL) { %>
     <%= shortURL %>   ->   <%= urlsInfo[shortURL][0] %> / Created Date: <%= urlsInfo[shortURL][1] %> /
-    Visited Times: <%= urlsInfo[shortURL][2] %> / Unique Visits: <%= urlsInfo[shortURL][3].length %>
+    Visited Times: <%= urlsInfo[shortURL][2] %> / Unique Visits: <%= urlsInfo[shortURL][3] %>
 
     <button onclick="window.location.href = 'http://localhost:8080/urls/<%= shortURL %>';">Update</button>
     <form action="/urls/<%= shortURL %>/delete?_method=DELETE" method="post" style="display:inline">

@@ -22,11 +22,11 @@ app.use(methodOverride('_method'));
 const urlDatabase = {
   userRandomID: {
     "b2xVn2":
-      [ "http://www.lighthouselabs.ca", "2019-1-1 20:10:30", 5, ["a", "b", "c"] ],
+      [ "http://www.lighthouselabs.ca", "2019-1-1 20:10:30", 5, 0 ],
     "9sm5xK":
-      [ "http://www.google.com", "2019-1-19 20:10:30", 3, ["d", "e", "f"] ]
+      [ "http://www.google.com", "2019-1-19 20:10:30", 3, 0 ]
   }, user2RandomID: {
-    "b2xVn2": [ "http://www.lighthouselabs.ca", "2019-1-18 20:10:30", 5, { "visitors": ["a", "b", "c"] } ]
+    "b2xVn2": [ "http://www.lighthouselabs.ca", "2019-1-18 20:10:30", 5, 0 ]
   }
 };
 
@@ -112,7 +112,12 @@ app.get("/u/:id", (req, res) => {
   for (var user in urlDatabase) {
     if (shortUrl in urlDatabase[user]) {
       urlDatabase[user][shortUrl][2]++;
-      urlDatabase[user][shortUrl][3] = updateUniqueVisit(req, urlDatabase[user][shortUrl][3]);
+
+      if (!req.session[shortUrl]) {
+        urlDatabase[user][shortUrl][3] += 1;
+        req.session[shortUrl] = true;
+      }
+
       res.redirect(urlDatabase[user][shortUrl][0]);
       return;
     }
@@ -186,7 +191,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
 
-  delete req.session.user_id;
+  req.session = null;
   res.redirect("/login");
 });
 
@@ -305,19 +310,4 @@ function getUrlInfo(longUrl) {
   let currentTimeStr = `${currentTime.getFullYear()}-${currentTime.getMonth() + 1}-${currentTime.getDate()} ${currentTime.getHours()}:${currentTime.getMinutes()}:${currentTime.getSeconds()}`;
   let urlInfo = [longUrl, currentTimeStr, 0, []];
   return urlInfo;
-}
-
-function updateUniqueVisit(req, uniqueVisit) {
-
-  let ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
-
-  for (var uniqueIp of uniqueVisit) {
-    if (uniqueIp === ip) {
-      return uniqueVisit;
-    }
-  }
-
-  let newUniqueVisit = uniqueVisit;
-  newUniqueVisit.push(ip);
-  return newUniqueVisit;
 }
